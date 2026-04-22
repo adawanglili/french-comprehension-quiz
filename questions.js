@@ -469,11 +469,14 @@ let questions = [
 },
 {
  id:37,
- french:"Question FR 37",
- english:"Question EN 37",
- chinese:"问题 37",
- options:["A","B","C","D"],
- correct:0
+ french:"La « Conférence nationale sur la qualité de l’eau potable » a été organisée dans le but de fournir des renseignements à l’appui des activités entre¬prises pour élaborer une stratégie nationale destinée à garantir la salubrité de l’approvisionnement en eau potable au Canada.",
+ english:"The “National Drinking Water Quality Conference” was organized to provide information to support activities undertaken to develop a national strategy to ensure the safety of drinking water supplies in Canada.",
+ chinese:"“全国饮用水水质会议”的举办旨在提供信息，以支持为制定加拿大饮用水安全国家战略而开展的各项活动。",
+ options:["L’originalité de la conférence a résidé dans l’élaboration d’une stratégie pour garantir la salubrité de l’eau.",
+          "On a organisé la conférence pour permettre la diffusion d’information ayant trait à l’élaboration d’une stratégie de préservation de l’eau potable.",
+          "L’organisation de la conférence visait à faire le point sur l’efficacité des moyens susceptibles d’être adoptés pour assainir les eaux.",
+          "En organisant la conférence, on voulait favoriser la discussion sur la nécessité d’une stratégie visant à garantir l’approvisionnement en eau potable."],
+ correct:2
 },
 {
  id:38,

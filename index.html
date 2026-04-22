@@ -7,7 +7,41 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container"></div>
+  <div class="container">
+
+    <div class="header">
+      <span id="q-number">Q 1 / 40</span>
+      <span id="score-display">Score: 0</span>
+    </div>
+
+    <div id="timer">01:00:00</div>
+
+    <div id="progress-bar"><div id="progress"></div></div>
+
+    <div class="passage-label">🇫🇷 French</div>
+    <div class="passage" id="french-text"></div>
+
+    <div class="translation-block">
+      <div class="translation-toggle" id="toggle-en" onclick="toggleTranslation('en')">
+        <span><span class="lang-badge en-badge">EN</span> &nbsp;English Translation</span>
+        <span class="arrow" id="arrow-en">▼</span>
+      </div>
+      <div class="translation-content" id="content-en"></div>
+    </div>
+
+    <div class="translation-block">
+      <div class="translation-toggle" id="toggle-cn" onclick="toggleTranslation('cn')">
+        <span><span class="lang-badge cn-badge">中文</span> &nbsp;Chinese Translation</span>
+        <span class="arrow" id="arrow-cn">▼</span>
+      </div>
+      <div class="translation-content" id="content-cn"></div>
+    </div>
+
+    <div class="question-prompt" id="question-prompt">Choose the best answer:</div>
+    <div id="options"></div>
+
+  </div>
+
   <script src="questions.js"></script>
   <script src="script.js"></script>
 </body>

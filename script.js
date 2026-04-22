@@ -4,9 +4,12 @@ var wrongList = [];
 var activeQuestions = [];
 var timerInterval = null;
 var secondsLeft = 3600;
+// Track answered state: { chosenIdx, correctIdx } or null
+var answers = [];
 
 function init(questionSet) {
   activeQuestions = questionSet.slice();
+  answers = new Array(activeQuestions.length).fill(null);
   current = 0;
   score = 0;
   wrongList = [];
@@ -16,15 +19,13 @@ function init(questionSet) {
   loadQuestion();
 }
 
+/* ── Timer ── */
 function startTimer() {
   updateTimerDisplay();
   timerInterval = setInterval(function() {
     secondsLeft--;
     updateTimerDisplay();
-    if (secondsLeft <= 0) {
-      clearInterval(timerInterval);
-      endQuiz();
-    }
+    if (secondsLeft <= 0) { clearInterval(timerInterval); endQuiz(); }
   }, 1000);
 }
 
@@ -34,28 +35,19 @@ function updateTimerDisplay() {
   var h = Math.floor(secondsLeft / 3600);
   var m = Math.floor((secondsLeft % 3600) / 60);
   var s = secondsLeft % 60;
-  el.textContent =
-    pad(h) + ":" + pad(m) + ":" + pad(s);
-  if (secondsLeft <= 300) {
-    el.className = "danger";
-  } else if (secondsLeft <= 600) {
-    el.className = "warning";
-  } else {
-    el.className = "";
-  }
+  el.textContent = pad(h) + ":" + pad(m) + ":" + pad(s);
+  el.className = secondsLeft <= 300 ? "danger" : secondsLeft <= 600 ? "warning" : "";
 }
 
-function pad(n) {
-  return n < 10 ? "0" + n : "" + n;
-}
+function pad(n) { return n < 10 ? "0" + n : "" + n; }
 
+/* ── Load question ── */
 function loadQuestion() {
   var q = activeQuestions[current];
 
   document.getElementById("q-number").textContent =
     "Q " + (current + 1) + " / " + activeQuestions.length;
-  document.getElementById("score-display").textContent =
-    "Score: " + score;
+  document.getElementById("score-display").textContent = "Score: " + score;
 
   var pct = (current / activeQuestions.length) * 100;
   document.getElementById("progress").style.width = pct + "%";
@@ -64,7 +56,6 @@ function loadQuestion() {
   document.getElementById("content-en").textContent = q.english;
   document.getElementById("content-cn").textContent = q.chinese;
 
-  // Collapse both translations
   collapseTranslation("en");
   collapseTranslation("cn");
 
@@ -86,27 +77,61 @@ function loadQuestion() {
 
       label.appendChild(radio);
       label.appendChild(span);
-
-      label.addEventListener("click", function() {
-        selectAnswer(idx);
-      });
-
+      label.addEventListener("click", function() { selectAnswer(idx); });
       optDiv.appendChild(label);
     })(i);
   }
+
+  // If already answered, restore state
+  var saved = answers[current];
+  if (saved !== null) {
+    renderAnswered(saved.chosenIdx, saved.correctIdx);
+    expandTranslation("en");
+    expandTranslation("cn");
+  }
+
+  updateNavButtons();
 }
 
+/* ── Select answer ── */
 function selectAnswer(chosenIdx) {
-  var correctIdx = activeQuestions[current].correct;
+  if (answers[current] !== null) return; // already answered
 
-  // Remove all click handlers immediately
+  var correctIdx = activeQuestions[current].correct;
+  answers[current] = { chosenIdx: chosenIdx, correctIdx: correctIdx };
+
+  if (chosenIdx === correctIdx) {
+    score++;
+    document.getElementById("score-display").textContent = "Score: " + score;
+  } else {
+    wrongList.push(activeQuestions[current]);
+  }
+
+  renderAnswered(chosenIdx, correctIdx);
+  expandTranslation("en");
+  expandTranslation("cn");
+  updateNavButtons();
+
+  // Auto-advance after 1.8s if not on last question
+  setTimeout(function() {
+    if (current < activeQuestions.length - 1) {
+      current++;
+      loadQuestion();
+    } else {
+      // Check if all answered
+      var allDone = answers.every(function(a) { return a !== null; });
+      if (allDone) endQuiz();
+    }
+  }, 1800);
+}
+
+function renderAnswered(chosenIdx, correctIdx) {
+  // Disable options and show correct/wrong
   var labels = document.querySelectorAll(".option");
   for (var i = 0; i < labels.length; i++) {
     var newLabel = labels[i].cloneNode(true);
     labels[i].parentNode.replaceChild(newLabel, labels[i]);
   }
-
-  // Re-query after clone
   var updated = document.querySelectorAll(".option");
   for (var j = 0; j < updated.length; j++) {
     var radio = updated[j].querySelector("input");
@@ -119,27 +144,38 @@ function selectAnswer(chosenIdx) {
     }
     radio.disabled = true;
   }
-
-  if (chosenIdx === correctIdx) {
-    score++;
-  } else {
-    wrongList.push(activeQuestions[current]);
-  }
-
-  // Auto-expand translations after answering
-  expandTranslation("en");
-  expandTranslation("cn");
-
-  setTimeout(function() {
-    current++;
-    if (current < activeQuestions.length) {
-      loadQuestion();
-    } else {
-      endQuiz();
-    }
-  }, 1800);
 }
 
+/* ── Navigation ── */
+function goToPrev() {
+  if (current > 0) {
+    current--;
+    loadQuestion();
+  }
+}
+
+function goToNext() {
+  if (current < activeQuestions.length - 1) {
+    current++;
+    loadQuestion();
+  } else {
+    endQuiz();
+  }
+}
+
+function updateNavButtons() {
+  var prev = document.getElementById("btn-prev");
+  var next = document.getElementById("btn-next");
+  if (!prev || !next) return;
+
+  prev.disabled = (current === 0);
+  prev.style.opacity = (current === 0) ? "0.35" : "1";
+
+  var isLast = (current === activeQuestions.length - 1);
+  next.textContent = isLast ? "Finish →" : "Next →";
+}
+
+/* ── Translations ── */
 function collapseTranslation(id) {
   var content = document.getElementById("content-" + id);
   var arrow = document.getElementById("arrow-" + id);
@@ -168,9 +204,16 @@ function toggleTranslation(id) {
   }
 }
 
+/* ── End quiz ── */
 function endQuiz() {
   clearInterval(timerInterval);
-  var pct = Math.round((score / activeQuestions.length) * 100);
+  // Recalculate score from answers array
+  score = 0;
+  for (var i = 0; i < answers.length; i++) {
+    if (answers[i] !== null && answers[i].chosenIdx === answers[i].correctIdx) score++;
+  }
+  var total = activeQuestions.length;
+  var pct = Math.round((score / total) * 100);
   var timeUsed = 3600 - secondsLeft;
   var m = Math.floor(timeUsed / 60);
   var s = timeUsed % 60;
@@ -182,17 +225,20 @@ function endQuiz() {
   document.querySelector(".container").innerHTML =
     '<div class="end-screen">' +
       '<h2>Quiz Complete!</h2>' +
-      '<div class="final-score">' + score + ' / ' + activeQuestions.length + '</div>' +
+      '<div class="final-score">' + score + ' / ' + total + '</div>' +
       '<p>' + pct + '% correct &nbsp;&middot;&nbsp; Time used: ' + m + 'm ' + s + 's</p>' +
       retryBtn +
       '<button class="btn btn-primary" onclick="location.reload()">Start Over</button>' +
+      '<br><a href="landing.html" style="display:inline-block;margin-top:14px;font-size:13px;color:#7986cb;">← Back to Tests</a>' +
     '</div>';
 }
 
+/* ── Retry wrong ── */
 function retryWrong() {
   var saved = wrongList.slice();
   document.querySelector(".container").innerHTML =
-    '<div class="header">' +
+    '<div class="top-bar">' +
+      '<a href="landing.html" class="back-link">← Back</a>' +
       '<span id="q-number"></span>' +
       '<span id="score-display">Score: 0</span>' +
     '</div>' +
@@ -215,10 +261,14 @@ function retryWrong() {
       '<div class="translation-content" id="content-cn"></div>' +
     '</div>' +
     '<div class="question-prompt" id="question-prompt">Choose the best answer:</div>' +
-    '<div id="options"></div>';
+    '<div id="options"></div>' +
+    '<div class="nav-buttons">' +
+      '<button class="btn btn-nav" id="btn-prev" onclick="goToPrev()">← Previous</button>' +
+      '<button class="btn btn-nav" id="btn-next" onclick="goToNext()">Next →</button>' +
+    '</div>';
 
   init(saved);
 }
 
-// Start with all questions
+// Start
 init(questions);

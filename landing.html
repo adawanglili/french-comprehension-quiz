@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>French Level Tests – Self-Assessment</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f0f2f8;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 48px 16px;
+    }
+
+    .page {
+      background: #fff;
+      border-radius: 14px;
+      width: 760px;
+      max-width: 100%;
+      box-shadow: 0 4px 28px rgba(0,0,0,0.10);
+      overflow: hidden;
+    }
+
+    /* Top banner */
+    .banner {
+      background: #1a237e;
+      padding: 32px 40px 28px;
+      color: #fff;
+    }
+    .banner .gov-label {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #9fa8da;
+      margin-bottom: 10px;
+    }
+    .banner h1 {
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 6px;
+    }
+    .banner .subtitle {
+      font-size: 14px;
+      color: #c5cae9;
+    }
+
+    /* Body */
+    .body {
+      padding: 36px 40px;
+    }
+
+    .intro {
+      font-size: 15.5px;
+      color: #333;
+      line-height: 1.75;
+      margin-bottom: 28px;
+    }
+
+    /* Info box */
+    .info-box {
+      background: #f5f7ff;
+      border: 1px solid #c5cae9;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 32px;
+    }
+    .info-box h3 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #3f51b5;
+      margin-bottom: 14px;
+    }
+    .info-box ul {
+      list-style: none;
+      padding: 0;
+    }
+    .info-box ul li {
+      font-size: 14.5px;
+      color: #444;
+      line-height: 1.6;
+      padding: 5px 0 5px 24px;
+      position: relative;
+    }
+    .info-box ul li::before {
+      content: "✦";
+      position: absolute;
+      left: 0;
+      color: #7986cb;
+      font-size: 10px;
+      top: 8px;
+    }
+
+    /* Divider */
+    .divider {
+      border: none;
+      border-top: 1px solid #e8eaf6;
+      margin: 0 0 28px;
+    }
+
+    /* Section heading */
+    .section-heading {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a237e;
+      margin-bottom: 20px;
+    }
+    .section-heading span {
+      display: inline-block;
+      background: #e8eaf6;
+      color: #3f51b5;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-left: 10px;
+      vertical-align: middle;
+      letter-spacing: 0.5px;
+    }
+
+    /* Test card */
+    .test-card {
+      border: 1.5px solid #e8eaf6;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .test-card:hover {
+      border-color: #7986cb;
+      box-shadow: 0 2px 12px rgba(63,81,181,0.10);
+    }
+
+    .test-card .card-info {}
+    .test-card .card-title {
+      font-size: 15.5px;
+      font-weight: 600;
+      color: #1a237e;
+      margin-bottom: 5px;
+    }
+    .test-card .card-meta {
+      font-size: 13px;
+      color: #888;
+    }
+    .test-card .card-meta span {
+      display: inline-block;
+      margin-right: 14px;
+    }
+    .test-card .card-meta .dot {
+      color: #c5cae9;
+      margin-right: 4px;
+    }
+
+    .start-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #3f51b5;
+      color: #fff;
+      padding: 11px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: background 0.15s, transform 0.1s;
+      border: none;
+      cursor: pointer;
+    }
+    .start-btn:hover {
+      background: #303f9f;
+      transform: translateY(-1px);
+    }
+    .start-btn .arrow {
+      font-size: 16px;
+    }
+
+    /* Footer note */
+    .footer-note {
+      margin-top: 32px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+      font-size: 12.5px;
+      color: #aaa;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <div class="banner">
+      <div class="gov-label">Public Service Commission of Canada</div>
+      <h1>Self-Assessment Tests</h1>
+      <div class="subtitle">Second Language Evaluation — French Level Tests</div>
+    </div>
+
+    <div class="body">
+
+      <p class="intro">
+        Try out the self-assessment tests for written expression and reading comprehension
+        before you take the official tests.
+      </p>
+
+      <div class="info-box">
+        <h3>These tests</h3>
+        <ul>
+          <li>Give you an idea of the level (A, B or C) you could attain on the official test</li>
+          <li>Give unofficial results that cannot be used in a selection process</li>
+          <li>Differ from the official tests in terms of length and question types</li>
+          <li>Are available online or in paper format</li>
+          <li>Are available in multiple formats for persons requiring assessment accommodation</li>
+        </ul>
+      </div>
+
+      <hr class="divider">
+
+      <div class="section-heading">
+        French Level Tests
+        <span>Online</span>
+      </div>
+
+      <div class="test-card">
+        <div class="card-info">
+          <div class="card-title">Self-assessment test for reading comprehension</div>
+          <div class="card-meta">
+            <span><span class="dot">●</span>40 questions</span>
+            <span><span class="dot">●</span>60 min time limit</span>
+            <span><span class="dot">●</span>French passages with EN / 中文 support</span>
+          </div>
+        </div>
+        <a class="start-btn" href="index.html">
+          Start Test <span class="arrow">→</span>
+        </a>
+      </div>
+
+      <div class="footer-note">
+        Results are for self-assessment purposes only and cannot be used in an official selection process.
+        Official Second Language Evaluation tests are administered by the Public Service Commission of Canada.
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>

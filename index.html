@@ -9,13 +9,13 @@
 <body>
   <div class="container">
 
-    <div class="header">
+    <div class="top-bar">
+      <a href="landing.html" class="back-link">← Back</a>
       <span id="q-number">Q 1 / 40</span>
       <span id="score-display">Score: 0</span>
     </div>
 
     <div id="timer">01:00:00</div>
-
     <div id="progress-bar"><div id="progress"></div></div>
 
     <div class="passage-label">🇫🇷 French</div>
@@ -39,6 +39,11 @@
 
     <div class="question-prompt" id="question-prompt">Choose the best answer:</div>
     <div id="options"></div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-nav" id="btn-prev" onclick="goToPrev()">← Previous</button>
+      <button class="btn btn-nav" id="btn-next" onclick="goToNext()">Next →</button>
+    </div>
 
   </div>
 

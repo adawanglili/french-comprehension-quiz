@@ -193,3 +193,45 @@ body {
 .btn:hover { opacity: 0.88; transform: translateY(-1px); }
 .btn-primary { background: #3f51b5; color: #fff; }
 .btn-warning { background: #f57c00; color: #fff; }
+
+/* Top bar with back link */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.back-link {
+  font-size: 13px;
+  color: #7986cb;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.15s;
+}
+.back-link:hover { color: #3f51b5; }
+
+/* Prev / Next nav */
+.nav-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+.btn-nav {
+  background: #fff;
+  color: #3f51b5;
+  border: 1.5px solid #c5cae9;
+  padding: 9px 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+.btn-nav:hover:not(:disabled) {
+  background: #e8eaf6;
+  border-color: #7986cb;
+  transform: translateY(-1px);
+}
+.btn-nav:disabled { cursor: default; }

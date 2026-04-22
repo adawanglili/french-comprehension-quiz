@@ -188,32 +188,132 @@ function toggleTranslation(id) {
   }
 }
 
+/* ── Get level from score ── */
+function getLevel(s) {
+  if (s <= 12) return "X (below A / inférieur à A)";
+  if (s <= 16) return "X/A";
+  if (s <= 20) return "A";
+  if (s <= 24) return "A/B";
+  if (s <= 28) return "B";
+  if (s <= 32) return "B/C";
+  return "C";
+}
+
+function getLevelClass(s) {
+  if (s <= 12) return "level-x";
+  if (s <= 16) return "level-xa";
+  if (s <= 20) return "level-a";
+  if (s <= 24) return "level-ab";
+  if (s <= 28) return "level-b";
+  if (s <= 32) return "level-bc";
+  return "level-c";
+}
+
 /* ── End quiz ── */
 function endQuiz() {
   clearInterval(timerInterval);
-  // Recalculate score from answers array
   score = 0;
   for (var i = 0; i < answers.length; i++) {
     if (answers[i] !== null && answers[i].chosenIdx === answers[i].correctIdx) score++;
   }
   var total = activeQuestions.length;
-  var pct = Math.round((score / total) * 100);
   var timeUsed = 3600 - secondsLeft;
-  var m = Math.floor(timeUsed / 60);
-  var s = timeUsed % 60;
+  var tm = Math.floor(timeUsed / 60);
+  var ts = timeUsed % 60;
+  var timeStr = tm + " min " + ts + " sec";
+  var overtime = timeUsed > 3600;
+  var level = getLevel(score);
+  var lvlClass = getLevelClass(score);
 
   var retryBtn = wrongList.length > 0
     ? '<button class="btn btn-warning" onclick="retryWrong()">Retry ' + wrongList.length + ' Wrong Answer' + (wrongList.length > 1 ? "s" : "") + '</button>'
     : "";
 
+  var rows = [
+    ["1–12",  "X (below A)",  "level-x"],
+    ["13–16", "X/A",          "level-xa"],
+    ["17–20", "A",            "level-a"],
+    ["21–24", "A/B",          "level-ab"],
+    ["25–28", "B",            "level-b"],
+    ["29–32", "B/C",          "level-bc"],
+    ["33–40", "C",            "level-c"]
+  ];
+  var rows_fr = [
+    ["1–12",  "X (inférieur à A)", "level-x"],
+    ["13–16", "X/A",               "level-xa"],
+    ["17–20", "A",                 "level-a"],
+    ["21–24", "A/B",               "level-ab"],
+    ["25–28", "B",                 "level-b"],
+    ["29–32", "B/C",               "level-bc"],
+    ["33–40", "C",                 "level-c"]
+  ];
+
+  function buildTable(rowData, scoreCol, levelCol) {
+    var t = '<table class="level-table"><thead><tr><th>' + scoreCol + '</th><th>' + levelCol + '</th></tr></thead><tbody>';
+    for (var i = 0; i < rowData.length; i++) {
+      var r = rowData[i];
+      var highlight = (r[2] === lvlClass) ? ' class="highlight"' : '';
+      t += '<tr' + highlight + '><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>';
+    }
+    t += '</tbody></table>';
+    return t;
+  }
+
+  var overtimeWarningEN = overtime
+    ? '<p class="overtime-warn">⚠ You took longer than 60 minutes to complete the Level Test. Your score may not be an accurate predictor of your level.</p>'
+    : '';
+  var overtimeWarningFR = overtime
+    ? '<p class="overtime-warn">⚠ Vous avez pris plus de 60 minutes pour compléter ce Test de niveau. Votre note n\'est peut-être pas représentative de votre niveau.</p>'
+    : '';
+
   document.querySelector(".container").innerHTML =
-    '<div class="end-screen">' +
-      '<h2>Quiz Complete!</h2>' +
-      '<div class="final-score">' + score + ' / ' + total + '</div>' +
-      '<p>' + pct + '% correct &nbsp;&middot;&nbsp; Time used: ' + m + 'm ' + s + 's</p>' +
+    '<div class="summary">' +
+
+    // ── English section ──
+    '<div class="summary-section">' +
+      '<div class="summary-flag">🇬🇧 English</div>' +
+      '<h2>Level Test for Reading Comprehension in the Second Official Language</h2>' +
+      '<p>Thank you for completing this Level Test. Your result is not official, but will provide you with an indication of the level that you may achieve on the SLE – Test of Reading Comprehension.</p>' +
+      '<p style="margin-top:8px">Please print this page for your records.</p>' +
+      '<div class="score-block">' +
+        '<div class="score-label">You obtained</div>' +
+        '<div class="score-num">' + score + '<span class="score-total"> / ' + total + '</span></div>' +
+        '<div class="score-level ' + lvlClass + '">Level: ' + level + '</div>' +
+      '</div>' +
+      '<p style="margin-bottom:10px">Use the table below to find the level associated with your score.</p>' +
+      buildTable(rows, "Score", "Level") +
+      '<p class="time-taken">It took you <strong>' + timeStr + '</strong> to complete the Level Check.</p>' +
+      overtimeWarningEN +
+    '</div>' +
+
+    '<hr class="summary-divider">' +
+
+    // ── French section ──
+    '<div class="summary-section">' +
+      '<div class="summary-flag">🇫🇷 Français</div>' +
+      '<h2>Test de niveau pour la compréhension de l\'écrit dans la seconde langue officielle</h2>' +
+      '<p>Merci d\'avoir complété le Test de niveau. Votre résultat n\'est pas officiel et a pour but de vous donner une idée du niveau que vous pourriez obtenir au Test de compréhension de l\'ELS.</p>' +
+      '<p style="margin-top:8px">Veuillez imprimer cette page pour vos dossiers.</p>' +
+      '<div class="score-block">' +
+        '<div class="score-label">Vous avez obtenu</div>' +
+        '<div class="score-num">' + score + '<span class="score-total"> / ' + total + '</span></div>' +
+        '<div class="score-level ' + lvlClass + '">Niveau : ' + level + '</div>' +
+      '</div>' +
+      '<p style="margin-bottom:10px">Veuillez utiliser le tableau ci-dessous pour connaître le niveau associé à la note que vous avez obtenue.</p>' +
+      buildTable(rows_fr, "Note", "Niveau") +
+      '<p class="time-taken">Cela vous a pris <strong>' + timeStr + '</strong> pour répondre aux questions du Test de niveau.</p>' +
+      overtimeWarningFR +
+      '<p style="margin-top:12px">Si vous avez des commentaires à formuler, veuillez aller à la page suivante.</p>' +
+    '</div>' +
+
+    // ── Buttons ──
+    '<div class="summary-actions">' +
       retryBtn +
-      '<button class="btn btn-primary" onclick="location.reload()">Start Over</button>' +
-      '<br><a href="landing.html" style="display:inline-block;margin-top:14px;font-size:13px;color:#7986cb;">← Back to Tests</a>' +
+      '<button class="btn btn-primary" onclick="window.print()">🖨 Print this page</button>' +
+      '<button class="btn btn-secondary" onclick="location.reload()">Start Over</button>' +
+      '<a href="landing.html" class="btn btn-secondary">← Back to Tests</a>' +
+    '</div>' +
+
     '</div>';
 }
 

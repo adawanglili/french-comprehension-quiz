@@ -1,191 +1,193 @@
-*{box-sizing:border-box;margin:0;padding:0}
+let current = 0, score = 0, wrong = [], timerInterval = null;
+const TOTAL_SECONDS = 60 * 60; // 1 hour
+let secondsLeft = TOTAL_SECONDS;
 
-body{
-  font-family:'Segoe UI',Arial,sans-serif;
-  background:#eef1f7;
-  display:flex;a
-  justify-content:center;
-  padding:30px 16px;
-  min-height:100vh;
+/* ── Timer ── */
+function startTimer() {
+  const el = document.getElementById("timer");
+  timerInterval = setInterval(() => {
+    secondsLeft--;
+    const h = Math.floor(secondsLeft / 3600);
+    const m = Math.floor((secondsLeft % 3600) / 60);
+    const s = secondsLeft % 60;
+    el.textContent = `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+    el.className = secondsLeft <= 300 ? "danger" : secondsLeft <= 600 ? "warning" : "";
+    if (secondsLeft <= 0) { clearInterval(timerInterval); endQuiz(); }
+  }, 1000);
 }
 
-.container{
-  background:#fff;
-  padding:28px 32px;
-  border-radius:14px;
-  width:740px;
-  max-width:100%;
-  box-shadow:0 4px 24px rgba(0,0,0,0.09);
+/* ── Load question ── */
+function loadQuestion() {
+  const q = questions[current];
+
+  document.getElementById("q-number").textContent = `Q ${current + 1} / ${questions.length}`;
+  document.getElementById("score-display").textContent = `Score: ${score}`;
+
+  const pct = (current / questions.length) * 100;
+  document.getElementById("progress").style.width = pct + "%";
+
+  document.getElementById("french-text").textContent = q.french;
+  document.getElementById("content-en").textContent = q.english;
+  document.getElementById("content-cn").textContent = q.chinese;
+
+  // Collapse translations on new question
+  document.querySelectorAll(".translation-toggle").forEach(t => {
+    t.classList.remove("open");
+  });
+  document.querySelectorAll(".translation-content").forEach(c => {
+    c.classList.remove("visible");
+  });
+
+  // Update question prompt (the EN question stem is the last sentence / heading)
+  // We display it as the question prompt separately — use the options label area
+  const promptEl = document.getElementById("question-prompt");
+  // Derive a short prompt from the question id context — use generic fallback
+  promptEl.textContent = "Choose the best answer:";
+
+  // Build options
+  const optDiv = document.getElementById("options");
+  optDiv.innerHTML = "";
+  q.options.forEach((o, i) => {
+    const label = document.createElement("label");
+    label.className = "option";
+
+    const radio = document.createElement("input");
+    radio.type = "radio";
+    radio.name = "answer";
+    radio.value = i;
+
+    const span = document.createElement("span");
+    span.textContent = o;
+
+    label.appendChild(radio);
+    label.appendChild(span);
+    label.onclick = () => selectAnswer(label, i);
+    optDiv.appendChild(label);
+  });
 }
 
-.header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:8px;
+/* ── Select answer ── */
+function selectAnswer(chosenLabel, chosenIdx) {
+  const correctIdx = questions[current].correct;
+
+  // Disable all options
+  document.querySelectorAll(".option").forEach((label, idx) => {
+    label.onclick = null;
+    const radio = label.querySelector("input");
+    if (idx === correctIdx) {
+      label.classList.add("correct");
+      radio.checked = (idx === chosenIdx);
+    } else if (idx === chosenIdx) {
+      label.classList.add("wrong");
+      radio.checked = true;
+    }
+    radio.disabled = true;
+  });
+
+  if (chosenIdx === correctIdx) score++;
+  else wrong.push(questions[current]);
+
+  // Auto-expand translations after answering
+  document.querySelectorAll(".translation-toggle").forEach(t => t.classList.add("open"));
+  document.querySelectorAll(".translation-content").forEach(c => c.classList.add("visible"));
+
+  setTimeout(() => {
+    current++;
+    if (current < questions.length) loadQuestion();
+    else endQuiz();
+  }, 1800);
 }
 
-#q-number{font-size:15px;font-weight:600;color:#555}
-#score-display{font-size:15px;font-weight:600;color:#2e7d32}
-
-#timer{
-  font-size:22px;
-  font-weight:700;
-  color:#1a237e;
-  letter-spacing:1px;
-  text-align:center;
-  margin-bottom:8px;
-}
-#timer.warning{color:#e65100}
-#timer.danger{color:#c62828;animation:pulse 0.8s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-
-#progress-bar{
-  height:8px;
-  background:#e0e0e0;
-  border-radius:4px;
-  margin-bottom:22px;
-  overflow:hidden;
-}
-#progress{
-  height:100%;
-  background:linear-gradient(90deg,#43a047,#66bb6a);
-  width:0%;
-  transition:width 0.4s ease;
-  border-radius:4px;
+/* ── Toggle translation ── */
+function toggleTranslation(id) {
+  const toggle = document.getElementById("toggle-" + id);
+  const content = document.getElementById("content-" + id);
+  const isOpen = content.classList.contains("visible");
+  if (isOpen) {
+    content.classList.remove("visible");
+    toggle.classList.remove("open");
+  } else {
+    content.classList.add("visible");
+    toggle.classList.add("open");
+  }
 }
 
-.passage{
-  background:#f8f9ff;
-  border-left:4px solid #3f51b5;
-  border-radius:0 8px 8px 0;
-  padding:14px 18px;
-  margin-bottom:14px;
-  font-size:15px;
-  line-height:1.7;
-  color:#222;
-  white-space:pre-wrap;
+/* ── End quiz ── */
+function endQuiz() {
+  clearInterval(timerInterval);
+  const pct = Math.round((score / questions.length) * 100);
+  const timeUsed = TOTAL_SECONDS - secondsLeft;
+  const m = Math.floor(timeUsed / 60);
+  const s = timeUsed % 60;
+  document.querySelector(".container").innerHTML = `
+    <div class="end-screen">
+      <h2>Quiz Complete!</h2>
+      <div class="final-score">${score} / ${questions.length}</div>
+      <p>${pct}% correct &nbsp;·&nbsp; Time used: ${m}m ${s}s</p>
+      ${wrong.length > 0
+        ? `<button class="btn btn-warning" onclick="retryWrong()">Retry ${wrong.length} Wrong Answer${wrong.length > 1 ? "s" : ""}</button>`
+        : ""}
+      <button class="btn btn-primary" onclick="location.reload()">Start Over</button>
+    </div>`;
 }
 
-.passage-label{
-  font-size:11px;
-  font-weight:700;
-  letter-spacing:1.2px;
-  color:#3f51b5;
-  text-transform:uppercase;
-  margin-bottom:6px;
+/* ── Retry wrong ── */
+function retryWrong() {
+  questions = wrong.slice();
+  current = 0; score = 0; wrong = [];
+  secondsLeft = TOTAL_SECONDS;
+  location.reload(); // simplest: reload page, but we need to pass state
+  // Instead, re-render:
 }
 
-.translation-block{
-  margin-bottom:8px;
-  border:1px solid #e0e0e0;
-  border-radius:8px;
-  overflow:hidden;
+// Override retryWrong to avoid reload losing state
+(function() {
+  window.retryWrong = function() {
+    const saved = wrong.slice();
+    questions = saved;
+    current = 0; score = 0; wrong = [];
+    secondsLeft = TOTAL_SECONDS;
+    clearInterval(timerInterval);
+    // Re-render container
+    document.querySelector(".container").innerHTML = getContainerHTML();
+    startTimer();
+    loadQuestion();
+  };
+})();
+
+function getContainerHTML() {
+  return `
+    <div class="header">
+      <span id="q-number"></span>
+      <span id="score-display">Score: 0</span>
+    </div>
+    <div id="timer">01:00:00</div>
+    <div id="progress-bar"><div id="progress"></div></div>
+
+    <div class="passage-label">🇫🇷 French</div>
+    <div class="passage" id="french-text"></div>
+
+    <div class="translation-block">
+      <div class="translation-toggle" id="toggle-en" onclick="toggleTranslation('en')">
+        <span><span class="lang-badge en-badge">EN</span>&nbsp; English Translation</span>
+        <span><span class="toggle-hint">click to expand</span>&nbsp;<span class="arrow">▼</span></span>
+      </div>
+      <div class="translation-content" id="content-en"></div>
+    </div>
+
+    <div class="translation-block">
+      <div class="translation-toggle" id="toggle-cn" onclick="toggleTranslation('cn')">
+        <span><span class="lang-badge cn-badge">中文</span>&nbsp; Chinese Translation</span>
+        <span><span class="toggle-hint">click to expand</span>&nbsp;<span class="arrow">▼</span></span>
+      </div>
+      <div class="translation-content" id="content-cn"></div>
+    </div>
+
+    <div class="question-prompt" id="question-prompt">Choose the best answer:</div>
+    <div id="options"></div>`;
 }
 
-.translation-toggle{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:9px 16px;
-  cursor:pointer;
-  background:#fafafa;
-  user-select:none;
-  font-size:13px;
-  font-weight:600;
-  color:#555;
-  transition:background 0.15s;
-}
-.translation-toggle:hover{background:#f0f0f0}
-
-.lang-badge{
-  font-size:11px;
-  font-weight:700;
-  letter-spacing:1px;
-  padding:2px 8px;
-  border-radius:4px;
-}
-.en-badge{background:#e3f2fd;color:#1565c0}
-.cn-badge{background:#fce4ec;color:#880e4f}
-
-.toggle-hint{font-size:12px;color:#aaa}
-
-.arrow{
-  font-size:11px;
-  transition:transform 0.2s;
-  color:#bbb;
-}
-.translation-toggle.open .arrow{transform:rotate(180deg)}
-
-.translation-content{
-  display:none;
-  padding:12px 16px;
-  font-size:14px;
-  line-height:1.7;
-  color:#333;
-  background:#fff;
-  border-top:1px solid #eee;
-  white-space:pre-wrap;
-}
-.translation-content.visible{display:block}
-
-.question-prompt{
-  font-size:15px;
-  font-weight:600;
-  color:#333;
-  margin:18px 0 10px;
-  padding:10px 14px;
-  background:#fffde7;
-  border-radius:6px;
-  border-left:3px solid #f9a825;
-}
-
-.option{
-  display:flex;
-  align-items:flex-start;
-  gap:12px;
-  border:1.5px solid #dde1ea;
-  padding:11px 16px;
-  margin:7px 0;
-  cursor:pointer;
-  border-radius:8px;
-  transition:border-color 0.15s,background 0.15s;
-  font-size:14.5px;
-  color:#333;
-  line-height:1.5;
-}
-.option:hover{border-color:#9fa8da;background:#f5f5ff}
-
-.option input[type="radio"]{
-  margin-top:3px;
-  accent-color:#3f51b5;
-  flex-shrink:0;
-  width:16px;
-  height:16px;
-  cursor:pointer;
-}
-
-.option.correct{background:#e8f5e9;border-color:#43a047;color:#1b5e20}
-.option.wrong{background:#ffebee;border-color:#e53935;color:#b71c1c}
-.option.correct input[type="radio"]{accent-color:#43a047}
-.option.wrong input[type="radio"]{accent-color:#e53935}
-
-.end-screen{text-align:center;padding:20px 0}
-.end-screen h2{font-size:26px;color:#1a237e;margin-bottom:8px}
-.final-score{font-size:52px;font-weight:700;color:#2e7d32;margin:14px 0}
-.end-screen p{font-size:16px;color:#555;margin-bottom:22px}
-
-.btn{
-  display:inline-block;
-  padding:11px 28px;
-  border-radius:8px;
-  border:none;
-  font-size:15px;
-  font-weight:600;
-  cursor:pointer;
-  transition:opacity 0.15s,transform 0.1s;
-  margin:6px;
-}
-.btn:hover{opacity:0.88;transform:translateY(-1px)}
-.btn-primary{background:#3f51b5;color:#fff}
-.btn-warning{background:#f57c00;color:#fff}
+/* ── Init ── */
+document.querySelector(".container").innerHTML = getContainerHTML();
+startTimer();
+loadQuestion();

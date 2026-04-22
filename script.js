@@ -86,8 +86,6 @@ function loadQuestion() {
   var saved = answers[current];
   if (saved !== null) {
     renderAnswered(saved.chosenIdx, saved.correctIdx);
-    expandTranslation("en");
-    expandTranslation("cn");
   }
 
   updateNavButtons();
@@ -108,21 +106,7 @@ function selectAnswer(chosenIdx) {
   }
 
   renderAnswered(chosenIdx, correctIdx);
-  expandTranslation("en");
-  expandTranslation("cn");
   updateNavButtons();
-
-  // Auto-advance after 1.8s if not on last question
-  setTimeout(function() {
-    if (current < activeQuestions.length - 1) {
-      current++;
-      loadQuestion();
-    } else {
-      // Check if all answered
-      var allDone = answers.every(function(a) { return a !== null; });
-      if (allDone) endQuiz();
-    }
-  }, 1800);
 }
 
 function renderAnswered(chosenIdx, correctIdx) {
